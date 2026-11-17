@@ -3,5 +3,10 @@
 FROM makeplane/plane-aio-community:stable
 
 USER root
-COPY brand /opt/amala-brand
-RUN python3 /opt/amala-brand/apply_branding.py
+COPY . /opt/amala-src
+RUN mkdir -p /opt/amala-brand/assets \
+ && cd /opt/amala-src \
+ && cp apply_branding.py brand.css brand.js /opt/amala-brand/ \
+ && cp *.png *.ico *.gif /opt/amala-brand/assets/ \
+ && python3 /opt/amala-brand/apply_branding.py \
+ && rm -rf /opt/amala-src
