@@ -1,0 +1,14 @@
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@800&display=swap");
+/* Hide Plane's wordmark logo and show an AMALA wordmark in its place */
+svg[viewBox="0 0 253 53"] { display: none !important; }
+*:has(> svg[viewBox="0 0 253 53"])::after {
+  content: "AMALA";
+  font-family: "Manrope", system-ui, sans-serif;
+  font-weight: 800;
+  font-size: 22px;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  color: currentColor;
+}
+/* Hide Plane's customer-logo strip on the sign-in pages */
+div:has(> div > div > svg[viewBox="0 0 64 16"]) { display: none !important; }
