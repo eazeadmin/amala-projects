@@ -49,7 +49,7 @@ css = open(os.path.join(BRAND, "brand.css")).read()
 js = open(os.path.join(BRAND, "brand.js")).read()
 INJECT = '<style id="amala-brand">%s</style><script id="amala-brand-js">%s</script>' % (css, js)
 
-counts = {"icons": 0, "html": 0, "manifest": 0, "email": 0}
+counts = {"icons": 0, "html": 0, "manifest": 0, "email": 0, "subjects": 0}
 
 
 def walk():
@@ -96,8 +96,28 @@ def brand_manifest(src):
     return re.sub(r'("(?:short_)?name"\s*:\s*")Plane[^"]*(")', r"\1%s\2" % NAME, src)
 
 
+EMAIL_LOGO = "https://projects.amala.agency/amala-email-logo.png"
+
+
 def brand_email(src):
-    return re.sub(r"(?<![\w./-])Plane(?![\w.-])", NAME, src)
+    src = re.sub(r'https://media\.docs\.plane\.so/logo/[^"\s)]+', EMAIL_LOGO, src)
+    src = src.replace('alt="Plane"', 'alt="AMALA"')
+    src = re.sub(r"Plane Software,?\s*Inc\.?", "AMALA Agency", src)
+    # "Plane" as a word, but not plane.so URLs or plane-* identifiers
+    return re.sub(r"(?<![\w./-])Plane(?!\w|-|\.so)", NAME, src)
+
+
+SUBJECTS = [
+    (" on Plane\"", " on %s\"" % NAME),
+    ("Your unique Plane login code", "Your %s login code" % NAME),
+    ("your Plane account", "your %s account" % NAME),
+]
+
+
+def brand_subjects(src):
+    for a, b in SUBJECTS:
+        src = src.replace(a, b)
+    return src
 
 
 for root, f in walk():
@@ -115,6 +135,10 @@ for root, f in walk():
     elif f.endswith(".html") and looks_like_plane_app(path):
         if rewrite(path, brand_html):
             counts["html"] += 1
+            shutil.copyfile(os.path.join(ASSETS, "amala-email-logo.png"), os.path.join(root, "amala-email-logo.png"))
+    elif f.endswith(".py") and "/bgtasks" in root:
+        if rewrite(path, brand_subjects):
+            counts["subjects"] += 1
     elif f in ("manifest.json", "site.webmanifest.json") or f.endswith(".webmanifest"):
         if rewrite(path, brand_manifest):
             counts["manifest"] += 1
