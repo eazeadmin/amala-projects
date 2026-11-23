@@ -2,10 +2,20 @@
 (function () {
   var NAME = "AMALA Projects";
   var DROP = [/Join [\d,]+\+ teams building with Plane/];
+  // Product name + AMALA's own terms: Work items -> To-dos, Modules -> Rocks, Pages -> Resources
   var RULES = [
     [/Plane Publish/g, NAME],
-    [/\bPlane\b/g, NAME]
+    [/\bPlane\b/g, NAME],
+    [/\bWORK ITEMS\b/g, "TO-DOS"], [/\bWork Items\b/g, "To-Dos"], [/\bWork items\b/g, "To-dos"], [/\bwork items\b/g, "to-dos"],
+    [/\bWORK ITEM\b/g, "TO-DO"], [/\bWork Item\b/g, "To-Do"], [/\bWork item\b/g, "To-do"], [/\bwork item\b/g, "to-do"],
+    [/\bMODULES\b/g, "ROCKS"], [/\bModules\b/g, "Rocks"], [/\bmodules\b/g, "rocks"],
+    [/\bMODULE\b/g, "ROCK"], [/\bModule\b/g, "Rock"], [/\bmodule\b/g, "rock"],
+    [/\bPAGES\b/g, "RESOURCES"], [/\bPages\b/g, "Resources"], [/\bpages\b/g, "resources"],
+    [/\bPage\b(?!\s+(?:\d|not found|of\b))/g, "Resource"],
+    [/\b(new|a|add|create|Create|Add|New) page\b/g, "$1 resource"]
   ];
+  var TRIGGER = /Plane|work items?|modules?|pages?/i;
+  var ATTRS = ["placeholder", "title", "aria-label", "alt"];
   var SKIP = { SCRIPT: 1, STYLE: 1, TEXTAREA: 1, INPUT: 1, CODE: 1, PRE: 1, NOSCRIPT: 1 };
 
   function fix(s) {
@@ -22,7 +32,7 @@
   function walk(root) {
     if (!root) return;
     if (root.nodeType === 3) {
-      if (root.nodeValue.indexOf("Plane") !== -1 && !editable(root.parentElement)) {
+      if (TRIGGER.test(root.nodeValue) && !editable(root.parentElement)) {
         var v = fix(root.nodeValue);
         if (v !== root.nodeValue) root.nodeValue = v;
       }
@@ -31,14 +41,15 @@
     if (root.nodeType !== 1 || SKIP[root.tagName] || root.isContentEditable) return;
     var t = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null), n;
     while ((n = t.nextNode())) walk(n);
-    ["placeholder", "title", "aria-label", "alt"].forEach(function (a) {
-      root.querySelectorAll && root.querySelectorAll("[" + a + "*='Plane']").forEach(function (el) {
-        el.setAttribute(a, fix(el.getAttribute(a)));
+    root.querySelectorAll && root.querySelectorAll("[placeholder],[title],[aria-label],[alt]").forEach(function (el) {
+      ATTRS.forEach(function (a) {
+        var v = el.getAttribute(a);
+        if (v && TRIGGER.test(v)) { var f = fix(v); if (f !== v) el.setAttribute(a, f); }
       });
     });
   }
   function fixTitle() {
-    if (document.title.indexOf("Plane") !== -1) document.title = fix(document.title);
+    if (TRIGGER.test(document.title)) { var f = fix(document.title); if (f !== document.title) document.title = f; }
   }
   var queued = false;
   function run() {
@@ -114,11 +125,11 @@
         "<h2>Outcome</h2><p><em>The measurable result this project is judged on. (Fill in.)</em></p>" +
         "<h2>Key links</h2><ul><li><p>Onboarding checklist: <em>(add link)</em></p></li><li><p>Client data dashboard: <em>(add link)</em></p></li><li><p>Drive folder: <em>(add link)</em></p></li></ul>" +
         "<h2>How this project works</h2><ul>" +
-        "<li><p><strong>Rocks</strong> are quarterly goals. Each Rock is a <strong>Module</strong> named \"Q# YYYY Rock: …\" with an owner and due date. Its progress % updates as tasks are completed. Module status: In Progress = On Track, Paused = Needs Attention / Blocked.</p></li>" +
-        "<li><p><strong>Tasks</strong> are work items with an owner (assignee), due date and department label.</p></li>" +
+        "<li><p><strong>Rocks</strong> are quarterly goals, named \"Q# YYYY Rock: …\" with an owner and due date. A Rock's progress % updates as its To-dos are completed. Rock status: In Progress = On Track, Paused = Needs Attention / Blocked.</p></li>" +
+        "<li><p><strong>To-dos</strong> have an owner (assignee), due date and department label.</p></li>" +
         "<li><p><strong>Status</strong>: Not Started → In Progress → Completed. Use Blocked when waiting on someone, Ongoing for recurring work.</p></li>" +
         "<li><p><strong>Priority</strong>: High = Priority 1, Medium = Priority 2, Low = Priority 3.</p></li>" +
-        "<li><p><strong>Weekly Scorecard</strong> and <strong>SOPs &amp; Assets</strong> live in Pages.</p></li>" +
+        "<li><p><strong>Weekly Scorecard</strong> and <strong>SOPs &amp; Assets</strong> live in Resources.</p></li>" +
         "<li><p>Rule: if it's not in AMALA Projects, it doesn't exist. Requests go here, not Slack DMs.</p></li></ul>"],
       ["Weekly Scorecard",
         "<p>Updated every Monday before the WIP. One row per measurable, one owner per row. Fill in owners and targets.</p><table><tbody>" +
@@ -210,7 +221,7 @@
     if (!modules.some(function (m) { return /\bRock\b/i.test(m.name); })) {
       await api("POST", "/modules/", {
         name: q.label + " Rock: (rename me)",
-        description: "A quarterly goal. Rename it, set the lead, and add the tasks that deliver it. Status: In Progress = On Track, Paused = Needs Attention / Blocked.",
+        description: "A quarterly goal. Rename it, set the lead, and add the To-dos that deliver it. Status: In Progress = On Track, Paused = Needs Attention / Blocked.",
         status: "planned",
         target_date: q.end
       });
