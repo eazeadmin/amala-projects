@@ -52,11 +52,11 @@
         "<h2>Outcome</h2><p><em>The measurable result this project is judged on. (Fill in.)</em></p>" +
         "<h2>Key links</h2><ul><li><p>Onboarding checklist: <em>(add link)</em></p></li><li><p>Client data dashboard: <em>(add link)</em></p></li><li><p>Drive folder: <em>(add link)</em></p></li></ul>" +
         "<h2>How this project works</h2><ul>" +
-        "<li><p><strong>Rocks</strong> are quarterly goals. Each Rock is a <strong>Module</strong> named \"Q# YYYY Rock: …\" with an owner and due date. Its progress % updates as tasks are completed. Module status: In Progress = On Track, Paused = Needs Attention / Blocked.</p></li>" +
-        "<li><p><strong>Tasks</strong> are work items with an owner (assignee), due date and department label.</p></li>" +
+        "<li><p><strong>Rocks</strong> are quarterly goals, named \"Q# YYYY Rock: …\" with an owner and due date. A Rock's progress % updates as its To-dos are completed. Rock status: In Progress = On Track, Paused = Needs Attention / Blocked.</p></li>" +
+        "<li><p><strong>To-dos</strong> have an owner (assignee), due date and department label.</p></li>" +
         "<li><p><strong>Status</strong>: Not Started → In Progress → Completed. Use Blocked when waiting on someone, Ongoing for recurring work.</p></li>" +
         "<li><p><strong>Priority</strong>: High = Priority 1, Medium = Priority 2, Low = Priority 3.</p></li>" +
-        "<li><p><strong>Weekly Scorecard</strong> and <strong>SOPs &amp; Assets</strong> live in Pages.</p></li>" +
+        "<li><p><strong>Weekly Scorecard</strong> and <strong>SOPs &amp; Assets</strong> live in Resources.</p></li>" +
         "<li><p>Rule: if it's not in AMALA Projects, it doesn't exist. Requests go here, not Slack DMs.</p></li></ul>"],
       ["Weekly Scorecard",
         "<p>Updated every Monday before the WIP. One row per measurable, one owner per row. Fill in owners and targets.</p><table><tbody>" +
@@ -148,7 +148,7 @@
     if (!modules.some(function (m) { return /\bRock\b/i.test(m.name); })) {
       await api("POST", "/modules/", {
         name: q.label + " Rock: (rename me)",
-        description: "A quarterly goal. Rename it, set the lead, and add the tasks that deliver it. Status: In Progress = On Track, Paused = Needs Attention / Blocked.",
+        description: "A quarterly goal. Rename it, set the lead, and add the To-dos that deliver it. Status: In Progress = On Track, Paused = Needs Attention / Blocked.",
         status: "planned",
         target_date: q.end
       });
